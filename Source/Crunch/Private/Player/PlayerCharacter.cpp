@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 APlayerCharacter::APlayerCharacter()
@@ -14,11 +15,14 @@ APlayerCharacter::APlayerCharacter()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetRootComponent());
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
-	
+
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
 	bUseControllerRotationYaw = false; // Don't rotate character with controller yaw
+
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Rotate character to movement direction
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 720.f, 0.f); // Set rotation rate for character movement
 }
 
 void APlayerCharacter::PawnClientRestart()
@@ -48,16 +52,45 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopJumping);
 
 		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &APlayerCharacter::HandleLookInput);
+		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &APlayerCharacter::HandleMoveInput);
 	}
 }
 
 void APlayerCharacter::HandleLookInput(const FInputActionValue& Value)
 {
-	const FVector2D LookAxis = Value.Get<FVector2D>();
+	FVector2D LookAxis = Value.Get<FVector2D>();
 	if (LookAxis.IsNearlyZero())
 	{
 		return;
 	}
 	AddControllerYawInput(LookAxis.X);
 	AddControllerPitchInput(-LookAxis.Y);
+}
+
+void APlayerCharacter::HandleMoveInput(const FInputActionValue& Value)
+{
+	FVector2D MoveAxis = Value.Get<FVector2D>();
+	if (MoveAxis.IsNearlyZero())
+	{
+		return;
+	}
+
+	MoveAxis.Normalize();
+
+	AddMovementInput(GetMoveForwardDirection() * MoveAxis.Y + GetLookRightDirection() * MoveAxis.X);
+}
+
+FVector APlayerCharacter::GetLookRightDirection() const
+{
+	return FollowCamera->GetRightVector();
+}
+
+FVector APlayerCharacter::GetLookForwardDirection() const
+{
+	return FollowCamera->GetForwardVector();
+}
+
+FVector APlayerCharacter::GetMoveForwardDirection() const
+{
+	return FVector::CrossProduct(GetLookRightDirection(), FVector::UpVector).GetSafeNormal();
 }

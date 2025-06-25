@@ -48,4 +48,12 @@ private:
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
 	void HandleLookInput(const FInputActionValue& Value);
+
+	void HandleMoveInput(const FInputActionValue& Value);
+
+	FVector GetLookRightDirection() const;
+
+	FVector GetLookForwardDirection() const;
+
+	FVector GetMoveForwardDirection() const;
 };
