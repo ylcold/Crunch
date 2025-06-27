@@ -50,6 +50,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Crunch|Animation", meta = (BlueprintThreadSafe))
 	FORCEINLINE bool GetIsOnGround() const { return !bIsJumping; }
 
+	UFUNCTION(BlueprintCallable, Category = "Crunch|Animation", meta = (BlueprintThreadSafe))
+	FORCEINLINE float GetLookYawOffset() const { return LookRotationOffset.Yaw; }
+
+	UFUNCTION(BlueprintCallable, Category = "Crunch|Animation", meta = (BlueprintThreadSafe))
+	FORCEINLINE float GetLookPitchOffset() const { return LookRotationOffset.Pitch; }
+
 private:
 	UPROPERTY()
 	TObjectPtr<ACharacter> OwningPlayerCharacter;
@@ -66,4 +72,6 @@ private:
 	bool bIsJumping;
 
 	FRotator PrevRotation;
+
+	FRotator LookRotationOffset;
 };
