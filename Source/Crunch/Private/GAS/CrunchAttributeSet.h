@@ -14,6 +14,8 @@
 	 GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	 GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
+class UAbilitySystemComponent;
+
 /**
  *
  */
@@ -24,20 +26,36 @@ class UCrunchAttributeSet : public UAttributeSet
 
 public:
 	ATTRIBUTE_ACCESSORS(UCrunchAttributeSet, Health)
-	ATTRIBUTE_ACCESSORS(UCrunchAttributeSet, MaxHealth)
-	ATTRIBUTE_ACCESSORS(UCrunchAttributeSet, Mana)
-	ATTRIBUTE_ACCESSORS(UCrunchAttributeSet, MaxMana)
+		ATTRIBUTE_ACCESSORS(UCrunchAttributeSet, MaxHealth)
+		ATTRIBUTE_ACCESSORS(UCrunchAttributeSet, Mana)
+		ATTRIBUTE_ACCESSORS(UCrunchAttributeSet, MaxMana)
+
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attributes", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(ReplicatedUsing = OnRep_Health)
 	FGameplayAttributeData Health;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attributes", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(ReplicatedUsing = OnRep_MaxHealth)
 	FGameplayAttributeData MaxHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attributes", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(ReplicatedUsing = OnRep_Mana)
 	FGameplayAttributeData Mana;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attributes", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(ReplicatedUsing = OnRep_MaxMana)
 	FGameplayAttributeData MaxMana;
+
+	UFUNCTION()
+	void OnRep_Health(const FGameplayAttributeData& OldValue);
+
+	UFUNCTION()
+	void OnRep_MaxHealth(const FGameplayAttributeData& OldValue);
+
+	UFUNCTION()
+	void OnRep_Mana(const FGameplayAttributeData& OldValue);
+
+	UFUNCTION()
+	void OnRep_MaxMana(const FGameplayAttributeData& OldValue);
 };
