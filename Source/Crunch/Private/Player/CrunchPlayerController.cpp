@@ -3,6 +3,7 @@
 
 #include "Player/CrunchPlayerController.h"
 #include "Player/PlayerCharacter.h"
+#include "Widgets/GameplayWidget.h"
 
 void ACrunchPlayerController::OnPossess(APawn* NewPawn)
 {
@@ -23,5 +24,24 @@ void ACrunchPlayerController::AcknowledgePossession(APawn* NewPawn)
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->ClientSideInit();
+		SpawnGameplayWidget();
+	}
+}
+
+void ACrunchPlayerController::SpawnGameplayWidget()
+{
+	if (!IsLocalPlayerController())
+	{
+		return;
+	}
+
+	GameplayWidget = CreateWidget<UGameplayWidget>(this, GameplayWidgetClass);
+	if (GameplayWidget)
+	{
+		GameplayWidget->AddToViewport();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to create GameplayWidget!"));
 	}
 }

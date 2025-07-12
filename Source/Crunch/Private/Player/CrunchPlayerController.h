@@ -7,14 +7,15 @@
 #include "CrunchPlayerController.generated.h"
 
 class APlayerCharacter;
+class UGameplayWidget;
 /**
- * 
+ *
  */
 UCLASS()
 class ACrunchPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
 public:
 	// only called  on the server
 	void OnPossess(APawn* NewPawn) override;
@@ -23,6 +24,14 @@ public:
 	void AcknowledgePossession(APawn* NewPawn) override;
 
 private:
+	void SpawnGameplayWidget();
+
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effect")
 	TObjectPtr<APlayerCharacter> PlayerCharacter;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UGameplayWidget> GameplayWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UGameplayWidget> GameplayWidget;
 };

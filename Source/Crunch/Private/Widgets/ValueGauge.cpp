@@ -4,6 +4,7 @@
 #include "Widgets/ValueGauge.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "AbilitySystemComponent.h"
 
 void UValueGauge::NativePreConstruct()
 {
@@ -12,8 +13,41 @@ void UValueGauge::NativePreConstruct()
 	ProgressBar->SetFillColorAndOpacity(BarColor);
 }
 
+void UValueGauge::SetAndBoundToGameplayAttribute(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayAttribute& Attribute, const FGameplayAttribute& MaxAttribute)
+{
+	if (AbilitySystemComponent)
+	{
+		bool bFound;
+		float Value = AbilitySystemComponent->GetGameplayAttributeValue(Attribute, bFound);
+		float MaxValue = AbilitySystemComponent->GetGameplayAttributeValue(MaxAttribute, bFound);
+
+		if (bFound)
+		{
+			SetGaugeValue(Value, MaxValue);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to find attribute value for %s or %s"), *Attribute.GetName(), *MaxAttribute.GetName());
+			ProgressBar->SetPercent(0.0f);
+			ValueText->SetText(FText::FromString(TEXT("0 / 0")));
+		}
+
+		// 先解绑，防止重复绑定
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Attribute).RemoveAll(this);
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(MaxAttribute).RemoveAll(this);
+
+		// 绑定属性变化委托
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Attribute).AddUObject(this, &UValueGauge::ValueChanged);
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(MaxAttribute).AddUObject(this, &UValueGauge::MaxValueChanged);
+	}
+}
+
 void UValueGauge::SetGaugeValue(float NewValue, float NewMaxValue)
 {
+
+	CachedValue = NewValue;
+	CachedMaxValue = NewMaxValue;
+
 	if (NewMaxValue <= 0.0f)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("NewMaxValue is zero or negative, cannot set gauge value."));
@@ -59,4 +93,14 @@ void UValueGauge::UpdateGaugeAnimation()
 		CurrentPercent = TargetPercent;
 		GetWorld()->GetTimerManager().ClearTimer(GaugeAnimTimerHandle);
 	}
+}
+
+void UValueGauge::ValueChanged(const FOnAttributeChangeData& Data)
+{
+	SetGaugeValue(Data.NewValue, CachedMaxValue);
+}
+
+void UValueGauge::MaxValueChanged(const FOnAttributeChangeData& Data)
+{
+	SetGaugeValue(CachedValue, Data.NewValue);
 }

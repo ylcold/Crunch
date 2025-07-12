@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "AttributeSet.h"
+#include "GameplayEffectTypes.h" // For FOnAttributeChangeData
 #include "ValueGauge.generated.h"
 
 
+class UAbilitySystemComponent;
 class UProgressBar;
 class UTextBlock;
 /**
@@ -19,6 +22,7 @@ class UValueGauge : public UUserWidget
 
 public:
 	virtual void NativePreConstruct() override;
+	void SetAndBoundToGameplayAttribute(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayAttribute& Attribute, const FGameplayAttribute & MaxAttribute);
 	void SetGaugeValue(float NewValue, float NewMaxValue);
 
 private:
@@ -39,4 +43,11 @@ private:
 
 	UFUNCTION()
 	void UpdateGaugeAnimation();
+
+	float CachedValue;
+	float CachedMaxValue;
+
+	void ValueChanged(const FOnAttributeChangeData& Data);
+
+	void MaxValueChanged(const FOnAttributeChangeData& Data);
 };
