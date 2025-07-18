@@ -7,42 +7,51 @@
 #include "AbilitySystemInterface.h"
 #include "CrunchCharacter.generated.h"
 
-
 class UCrunchAbilitySystemComponent;
 class UCrunchAttributeSet;
+class UWidgetComponent;
 
-
+/**
+ * 角色基类，集成能力系统
+ */
 UCLASS()
 class ACrunchCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
+	// 构造函数
 	ACrunchCharacter();
 
+	// IAbilitySystemInterface 实现
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	// 初始化
 	void ServerSideInit();
 	void ClientSideInit();
 
+	bool IsLocallyControlledByPlayer() const;
+
+	virtual void PossessedBy(AController* NewController) override;
+
 protected:
-	// Called when the game starts or when spawned
+	// 生命周期
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-public:
-	// IAbilitySystemInterface implementation
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-
 private:
+	// 能力系统组件
 	UPROPERTY(VisibleDefaultsOnly, Category = "Gameplay Ability")
 	TObjectPtr<UCrunchAbilitySystemComponent> CrunchAbilitySystemComponent;
 
+	// 属性集
 	UPROPERTY(VisibleDefaultsOnly, Category = "Gameplay Ability")
 	TObjectPtr<UCrunchAttributeSet> CrunchAttributeSet;
+
+	// 头顶UI组件
+	UPROPERTY(VisibleDefaultsOnly, Category = "Gameplay Ability")
+	TObjectPtr<UWidgetComponent> OverHeadWidgetComponent;
+
+	void ConfigureOverHeadWidgetComponent();
 };

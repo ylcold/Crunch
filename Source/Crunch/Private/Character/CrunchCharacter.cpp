@@ -3,8 +3,10 @@
 
 #include "Character/CrunchCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GAS/CrunchAbilitySystemComponent.h"
 #include "GAS/CrunchAttributeSet.h"
+#include "Widgets/OverHeadStatsGuage.h"
 
 // Sets default values
 ACrunchCharacter::ACrunchCharacter()
@@ -17,6 +19,10 @@ ACrunchCharacter::ACrunchCharacter()
 	CrunchAbilitySystemComponent = CreateDefaultSubobject<UCrunchAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 
 	CrunchAttributeSet = CreateDefaultSubobject<UCrunchAttributeSet>(TEXT("AttributeSet"));
+
+	// Initialize the OverHeadWidgetComponent
+	OverHeadWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverHeadWidgetComponent"));
+	OverHeadWidgetComponent->SetupAttachment(GetRootComponent());
 }
 
 void ACrunchCharacter::ServerSideInit()
@@ -30,11 +36,27 @@ void ACrunchCharacter::ClientSideInit()
 	CrunchAbilitySystemComponent->InitAbilityActorInfo(this, this);
 }
 
+bool ACrunchCharacter::IsLocallyControlledByPlayer() const
+{
+	return GetController() && GetController()->IsLocalPlayerController();
+}
+
+void ACrunchCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (NewController && !NewController->IsPlayerController())
+	{
+		ServerSideInit();
+	}
+}
+
 // Called when the game starts or when spawned
 void ACrunchCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ConfigureOverHeadWidgetComponent();
 }
 
 // Called every frame
@@ -56,3 +78,24 @@ UAbilitySystemComponent* ACrunchCharacter::GetAbilitySystemComponent() const
 	return CrunchAbilitySystemComponent;
 }
 
+void ACrunchCharacter::ConfigureOverHeadWidgetComponent()
+{
+	if (!OverHeadWidgetComponent)
+	{
+		return;
+	}
+
+	if (IsLocallyControlledByPlayer())
+	{
+		OverHeadWidgetComponent->SetHiddenInGame(true);
+		return;
+	}
+
+	UOverHeadStatsGuage* OverHeadStatsGuage = Cast<UOverHeadStatsGuage>(OverHeadWidgetComponent->GetUserWidgetObject());
+
+	if (OverHeadStatsGuage)
+	{
+		OverHeadStatsGuage->ConfigureWithASC(GetAbilitySystemComponent());
+		OverHeadWidgetComponent->SetHiddenInGame(false);
+	}
+}
