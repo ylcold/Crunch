@@ -7,6 +7,7 @@
 #include "GAS/CrunchAbilitySystemComponent.h"
 #include "GAS/CrunchAttributeSet.h"
 #include "Widgets/OverHeadStatsGuage.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ACrunchCharacter::ACrunchCharacter()
@@ -29,6 +30,7 @@ void ACrunchCharacter::ServerSideInit()
 {
 	CrunchAbilitySystemComponent->InitAbilityActorInfo(this, this);
 	CrunchAbilitySystemComponent->ApplyInitialEffects();
+	CrunchAbilitySystemComponent->GiveAbilities();
 }
 
 void ACrunchCharacter::ClientSideInit()
@@ -97,5 +99,17 @@ void ACrunchCharacter::ConfigureOverHeadWidgetComponent()
 	{
 		OverHeadStatsGuage->ConfigureWithASC(GetAbilitySystemComponent());
 		OverHeadWidgetComponent->SetHiddenInGame(false);
+		GetWorldTimerManager().ClearTimer(HeadStatGaugeVisiableUpdateTimer);
+		GetWorldTimerManager().SetTimer(HeadStatGaugeVisiableUpdateTimer, this, &ACrunchCharacter::UpdateHeadStatGaugeVisibility, HeadStatGaugeVisibleTime, true);
+	}
+}
+
+void ACrunchCharacter::UpdateHeadStatGaugeVisibility()
+{
+	APawn* LocalPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	if (LocalPawn)
+	{
+		float DistanceSquared = FVector::DistSquared(GetActorLocation(), LocalPawn->GetActorLocation());
+		OverHeadWidgetComponent -> SetHiddenInGame(DistanceSquared > HeadStatGaugeVisibleRangeSquared);
 	}
 }

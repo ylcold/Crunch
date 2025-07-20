@@ -50,8 +50,18 @@ private:
 	TObjectPtr<UCrunchAttributeSet> CrunchAttributeSet;
 
 	// Í·¶¥UI×é¼þ
-	UPROPERTY(VisibleDefaultsOnly, Category = "Gameplay Ability")
+	UPROPERTY(VisibleDefaultsOnly, Category = "UI")
 	TObjectPtr<UWidgetComponent> OverHeadWidgetComponent;
 
 	void ConfigureOverHeadWidgetComponent();
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	float HeadStatGaugeVisibleTime = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	float HeadStatGaugeVisibleRangeSquared = 10000000.f;
+
+	FTimerHandle HeadStatGaugeVisiableUpdateTimer;
+
+	void UpdateHeadStatGaugeVisibility();
 };

@@ -8,6 +8,7 @@
 
 
 class UGameplayEffect;
+class UGameplayAbility;
 
 /**
  * 
@@ -18,9 +19,17 @@ class UCrunchAbilitySystemComponent : public UAbilitySystemComponent
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Abilities")
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	TArray<TSubclassOf<UGameplayEffect>> InitialEffects;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities")
+	TArray<TSubclassOf<UGameplayAbility>> Abilities;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities")
+	TArray<TSubclassOf<UGameplayAbility>> BasicAbilities;
 
 public:
 	void ApplyInitialEffects();
+
+	void GiveAbilities();
 };
