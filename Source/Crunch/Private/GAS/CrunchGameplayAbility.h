@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,7 +7,7 @@
 #include "CrunchGameplayAbility.generated.h"
 
 /**
- *  ÓÎÏ·ÄÜÁ¦»ùÀà
+ *  æ¸¸æˆèƒ½åŠ›åŸºç±»
  */
 UCLASS()
 class UCrunchGameplayAbility : public UGameplayAbility

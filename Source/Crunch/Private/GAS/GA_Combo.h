@@ -15,8 +15,11 @@ class UGA_Combo : public UCrunchGameplayAbility
 	GENERATED_BODY()
 
 public:
-	/*UGA_Combo(const FObjectInitializer& ObjectInitializer);*/
-	// Override the ActivateAbility method to implement combo logic
+	UGA_Combo();
+
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	UAnimMontage* ComboMontage; 
 };
