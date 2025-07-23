@@ -27,22 +27,15 @@ void UCrunchAbilitySystemComponent::GiveAbilities()
 		return;
 	}
 
-	for (const TSubclassOf<UGameplayAbility>& AbilityClass : Abilities)
+	for (const TPair<ECrunchAbilityInputID, TSubclassOf<UGameplayAbility>>& AbilityPair : Abilities)
 	{
-		if (AbilityClass)
-		{
-			FGameplayAbilitySpec AbilitySpec(AbilityClass, 0, INDEX_NONE, nullptr);
-
-			GiveAbility(AbilitySpec);
-		}
+		FGameplayAbilitySpec AbilitySpec(AbilityPair.Value, 0, (int32)AbilityPair.Key, nullptr);
+		GiveAbility(AbilitySpec);
 	}
 
-	for (const TSubclassOf<UGameplayAbility>& AbilityClass : BasicAbilities)
+	for (const TPair<ECrunchAbilityInputID, TSubclassOf<UGameplayAbility>>& AbilityPair : BasicAbilities)
 	{
-		if (AbilityClass)
-		{
-			FGameplayAbilitySpec AbilitySpec(AbilityClass, 1, INDEX_NONE, nullptr);
-			GiveAbility(AbilitySpec);
-		}
+		FGameplayAbilitySpec AbilitySpec(AbilityPair.Value, 1, (int32)AbilityPair.Key, nullptr);
+		GiveAbility(AbilitySpec);
 	}
 }

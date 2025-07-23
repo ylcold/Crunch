@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/CrunchCharacter.h"
+#include "GAS/CrunchGameplayAbilityTypes.h"
 #include "PlayerCharacter.generated.h"
 
 class USpringArmComponent;
@@ -45,11 +46,16 @@ private:
 	TObjectPtr<UInputAction> MoveInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TMap<ECrunchAbilityInputID, TObjectPtr<UInputAction>> GameplayAbilityInputActions;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
 	void HandleLookInput(const FInputActionValue& Value);
 
 	void HandleMoveInput(const FInputActionValue& Value);
+
+	void HandleAbilityInput(const FInputActionValue& Value, ECrunchAbilityInputID InputID);
 
 	FVector GetLookRightDirection() const;
 

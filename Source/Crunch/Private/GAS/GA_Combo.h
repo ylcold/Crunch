@@ -21,5 +21,5 @@ public:
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
-	UAnimMontage* ComboMontage; 
+	UAnimMontage* ComboMontage;
 };

@@ -2,6 +2,7 @@
 
 
 #include "Player/PlayerCharacter.h"
+#include "AbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -53,6 +54,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &APlayerCharacter::HandleLookInput);
 		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &APlayerCharacter::HandleMoveInput);
+
+		for (const TPair<ECrunchAbilityInputID, TObjectPtr<UInputAction>>& InputActionPair : GameplayAbilityInputActions)
+		{
+			EnhancedInputComponent->BindAction(InputActionPair.Value, ETriggerEvent::Triggered, this, &APlayerCharacter::HandleAbilityInput, InputActionPair.Key);
+		}
 	}
 }
 
@@ -78,6 +84,19 @@ void APlayerCharacter::HandleMoveInput(const FInputActionValue& Value)
 	MoveAxis.Normalize();
 
 	AddMovementInput(GetMoveForwardDirection() * MoveAxis.Y + GetLookRightDirection() * MoveAxis.X);
+}
+
+void APlayerCharacter::HandleAbilityInput(const FInputActionValue& Value, ECrunchAbilityInputID InputID)
+{
+	bool bPressed = Value.Get<bool>();
+	if (bPressed)
+	{
+		GetAbilitySystemComponent()->AbilityLocalInputPressed((int32)InputID);
+	}
+	else
+	{
+		GetAbilitySystemComponent()->AbilityLocalInputReleased((int32)InputID);
+	}
 }
 
 FVector APlayerCharacter::GetLookRightDirection() const
