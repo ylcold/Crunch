@@ -2,4 +2,14 @@
 
 
 #include "GAS/CrunchGameplayAbility.h"
+#include "Components/SkeletalMeshComponent.h"
 
+UAnimInstance* UCrunchGameplayAbility::GetOwnerAnimInstance() const
+{
+	USkeletalMeshComponent* OwnerSkeletalMeshComponent = GetOwningComponentFromActorInfo();
+	if (OwnerSkeletalMeshComponent)
+	{
+		return OwnerSkeletalMeshComponent->GetAnimInstance();
+	}
+	return nullptr;
+}

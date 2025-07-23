@@ -3,7 +3,10 @@
 
 #include "GAS/GA_Combo.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
+#include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 #include "CrunchGameplayTags.h"
+#include "GameplayTagsManager.h"
 
 
 UGA_Combo::UGA_Combo()
@@ -17,21 +20,12 @@ UGA_Combo::UGA_Combo()
 
 void UGA_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-	//if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
-	//{
-	//	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-	//	return;
-	//}
 
 	if (!K2_CommitAbility())
 	{
 		K2_EndAbility();
 		return;
 	}
-
-
-	/*UE_LOG(LogTemp, Log, TEXT("Combo ability activated for %s"), *ActorInfo->OwnerActor->GetName());*/
-
 
 	if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
 	{
@@ -46,5 +40,75 @@ void UGA_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		MontageTask->OnInterrupted.AddDynamic(this, &UGA_Combo::K2_EndAbility);
 		MontageTask->OnCancelled.AddDynamic(this, &UGA_Combo::K2_EndAbility);
 		MontageTask->ReadyForActivation();
+
+		UAbilityTask_WaitGameplayEvent* WaitComboChangeEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+			this,
+			GetComboChangeEventTag(),
+			nullptr,
+			false,
+			false
+		);
+		WaitComboChangeEventTask->EventReceived.AddDynamic(this, &UGA_Combo::OnComboEventReceived);
+		WaitComboChangeEventTask->ReadyForActivation();
 	}
+
+	SetupWaitComboInputPress();
+}
+
+FGameplayTag UGA_Combo::GetComboChangeEventTag()
+{
+	return FGameplayTag::RequestGameplayTag(FName(TEXT("Ability.Combo.Change")));
+}
+
+void UGA_Combo::OnComboEventReceived(FGameplayEventData Payload)
+{
+	FGameplayTag EventTag = Payload.EventTag;
+	if (EventTag == CrunchGameplayTags::Ability_Combo_Change_End)
+	{
+		NextComboSectionName = NAME_None;
+		return;
+	}
+
+	TArray<FName> ComboSections;
+	UGameplayTagsManager::Get().SplitGameplayTagFName(EventTag, ComboSections);
+	NextComboSectionName = ComboSections.Last();
+
+	UE_LOG(LogTemp, Log, TEXT("Combo section changed to: %s"), *NextComboSectionName.ToString());
+}
+
+void UGA_Combo::SetupWaitComboInputPress()
+{
+	UAbilityTask_WaitInputPress* WaitInputPressTask = UAbilityTask_WaitInputPress::WaitInputPress(this);
+	WaitInputPressTask->OnPress.AddDynamic(this, &UGA_Combo::OnComboInputPressed);
+	WaitInputPressTask->ReadyForActivation();
+}
+
+void UGA_Combo::OnComboInputPressed(float TimeWaited)
+{
+	SetupWaitComboInputPress();
+
+	TryCommitCombo();
+}
+
+void UGA_Combo::TryCommitCombo()
+{
+
+	if (NextComboSectionName == NAME_None)
+	{
+		return;
+	}
+
+
+	UAnimInstance* OwnerAnimInstance = GetOwnerAnimInstance();
+
+	if (!OwnerAnimInstance)
+	{
+		return;
+	}
+
+	OwnerAnimInstance->Montage_SetNextSection(
+		OwnerAnimInstance->Montage_GetCurrentSection(ComboMontage),
+		NextComboSectionName,
+		ComboMontage
+	);
 }
