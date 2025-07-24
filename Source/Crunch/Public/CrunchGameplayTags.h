@@ -7,8 +7,10 @@
 
 namespace CrunchGameplayTags
 {
+	// Ability Tags
 	CRUNCH_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_BasicAttack);
 
+	// Combo Change Tags
 	CRUNCH_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Combo_Change_Combo01);
 
 	CRUNCH_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Combo_Change_Combo02);
@@ -18,4 +20,7 @@ namespace CrunchGameplayTags
 	CRUNCH_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Combo_Change_Combo04);
 
 	CRUNCH_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Combo_Change_End);
+
+	// Combo Damage Tags
+	CRUNCH_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Combo_Damage);
 }

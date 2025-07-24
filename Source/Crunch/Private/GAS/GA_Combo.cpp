@@ -52,12 +52,28 @@ void UGA_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		WaitComboChangeEventTask->ReadyForActivation();
 	}
 
+	if (K2_HasAuthority())
+	{
+		UAbilityTask_WaitGameplayEvent* WaitTargetingEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+			this,
+			CrunchGameplayTags::Ability_Combo_Damage
+		);
+
+		WaitTargetingEventTask->EventReceived.AddDynamic(this, &UGA_Combo::DoDamage);
+		WaitTargetingEventTask->ReadyForActivation();
+	}
+
 	SetupWaitComboInputPress();
 }
 
 FGameplayTag UGA_Combo::GetComboChangeEventTag()
 {
 	return FGameplayTag::RequestGameplayTag(FName(TEXT("Ability.Combo.Change")));
+}
+
+FGameplayTag UGA_Combo::GetComboTargetEventTag()
+{
+	return FGameplayTag::RequestGameplayTag(FName(TEXT("Ability.Combo.Damage")));
 }
 
 void UGA_Combo::OnComboEventReceived(FGameplayEventData Payload)
@@ -111,4 +127,9 @@ void UGA_Combo::TryCommitCombo()
 		NextComboSectionName,
 		ComboMontage
 	);
+}
+
+void UGA_Combo::DoDamage(FGameplayEventData Payload)
+{
+	TArray<FHitResult> HitResults = GetHitResultsSweepLocationTargetData(Payload.TargetData, 30.f, true, true);
 }

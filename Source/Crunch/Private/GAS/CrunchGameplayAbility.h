@@ -17,4 +17,6 @@ class UCrunchGameplayAbility : public UGameplayAbility
 
 protected:
 	UAnimInstance* GetOwnerAnimInstance() const;
+
+	TArray<FHitResult> GetHitResultsSweepLocationTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle , float SphereSweepRadius = 30.f, bool bDrawDebug = false, bool bIgnoreSelf = true) const;
 };
