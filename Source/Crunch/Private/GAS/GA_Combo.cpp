@@ -7,6 +7,7 @@
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 #include "CrunchGameplayTags.h"
 #include "GameplayTagsManager.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 
 UGA_Combo::UGA_Combo()
@@ -89,7 +90,7 @@ void UGA_Combo::OnComboEventReceived(FGameplayEventData Payload)
 	UGameplayTagsManager::Get().SplitGameplayTagFName(EventTag, ComboSections);
 	NextComboSectionName = ComboSections.Last();
 
-	UE_LOG(LogTemp, Log, TEXT("Combo section changed to: %s"), *NextComboSectionName.ToString());
+	/*UE_LOG(LogTemp, Log, TEXT("Combo section changed to: %s"), *NextComboSectionName.ToString());*/
 }
 
 void UGA_Combo::SetupWaitComboInputPress()
@@ -132,4 +133,36 @@ void UGA_Combo::TryCommitCombo()
 void UGA_Combo::DoDamage(FGameplayEventData Payload)
 {
 	TArray<FHitResult> HitResults = GetHitResultsSweepLocationTargetData(Payload.TargetData, 30.f, true, true);
+
+	for (const FHitResult& Hit : HitResults)
+	{
+		if (Hit.GetActor() && Hit.GetActor() != GetAvatarActorFromActorInfo())
+		{
+			TSubclassOf<UGameplayEffect> DamageEffect = GetDamageEffectForCurrentCombo();
+			FGameplayEffectSpecHandle DamageSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect, GetAbilityLevel(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo()));
+
+			ApplyGameplayEffectSpecToTarget(
+				GetCurrentAbilitySpecHandle(),
+				CurrentActorInfo,
+				CurrentActivationInfo,
+				DamageSpecHandle,
+				UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Hit.GetActor())
+			);
+		}
+	}
+}
+
+TSubclassOf<UGameplayEffect> UGA_Combo::GetDamageEffectForCurrentCombo() const
+{
+	UAnimInstance* OwnerAnimInstance = GetOwnerAnimInstance();
+	if (OwnerAnimInstance)
+	{
+		FName CurrentSectionName = OwnerAnimInstance->Montage_GetCurrentSection(ComboMontage);
+		const TSubclassOf<UGameplayEffect>* EffectPtr = DamageEffectMap.Find(CurrentSectionName);
+		if (EffectPtr)
+		{
+			return *EffectPtr;
+		}
+	}
+	return DefaultDamageEffect;
 }

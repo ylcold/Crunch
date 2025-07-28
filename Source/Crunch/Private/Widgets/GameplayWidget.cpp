@@ -5,6 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Widgets/ValueGauge.h"
+#include "Widgets/BaseBarWidget.h"
 #include "GAS/CrunchAttributeSet.h"
 
 
@@ -17,6 +18,6 @@ void UGameplayWidget::NativeConstruct()
 	if (AbilitySystemComponent)
 	{
 		HealthBar->SetAndBoundToGameplayAttribute(AbilitySystemComponent, UCrunchAttributeSet::GetHealthAttribute(), UCrunchAttributeSet::GetMaxHealthAttribute());
-		ManaBar->SetAndBoundToGameplayAttribute(AbilitySystemComponent, UCrunchAttributeSet::GetManaAttribute(), UCrunchAttributeSet::GetMaxManaAttribute());
+		ManaBar->SetAndBoundToGameplayAttributeBase(AbilitySystemComponent, UCrunchAttributeSet::GetManaAttribute(), UCrunchAttributeSet::GetMaxManaAttribute());
 	}
 }

@@ -22,12 +22,16 @@ class UValueGauge : public UUserWidget
 
 public:
 	virtual void NativePreConstruct() override;
-	void SetAndBoundToGameplayAttribute(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayAttribute& Attribute, const FGameplayAttribute & MaxAttribute);
+	void SetAndBoundToGameplayAttribute(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayAttribute& Attribute, const FGameplayAttribute& MaxAttribute);
 	void SetGaugeValue(float NewValue, float NewMaxValue);
+	void SetGaugeValueOther(float NewValue, float NewMaxValue);
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Visual")
 	FLinearColor BarColor;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	UProgressBar* DelayedBar;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
 	UProgressBar* ProgressBar;
@@ -35,17 +39,27 @@ private:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
 	UTextBlock* ValueText;
 
+	/*UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	UProgressBar* ImmediateBar;*/
+
+
+
+	FTimerHandle DelayBarTimerHandle;
+
 	FTimerHandle GaugeAnimTimerHandle;
+
 	float CurrentPercent = 0.0f;
 	float TargetPercent = 0.0f;
 	float AnimDuration = 0.3f; // ∂Øª≠ ±≥§£®√Î£©
 	float AnimElapsed = 0.0f;
+	float CachedValue;
+	float CachedMaxValue;
+	float DelayedPercent = 1.0f;
 
 	UFUNCTION()
 	void UpdateGaugeAnimation();
 
-	float CachedValue;
-	float CachedMaxValue;
+	void UpdateDelayedBar();
 
 	void ValueChanged(const FOnAttributeChangeData& Data);
 

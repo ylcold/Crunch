@@ -18,10 +18,14 @@ UAnimInstance* UCrunchGameplayAbility::GetOwnerAnimInstance() const
 TArray<FHitResult> UCrunchGameplayAbility::GetHitResultsSweepLocationTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius, bool bDrawDebug, bool bIgnoreSelf) const
 {
 	TArray<FHitResult> OutResults;
+	TSet<AActor*> HitActors;
 
-	// 只需初始化一次
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+	if (TargetDataHandle.Data.Num() == 0)
+	{
+		return OutResults;
+	}
+
+	static const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = { UEngineTypes::ConvertToObjectType(ECC_Pawn) };
 
 	TArray<AActor*> ActorsToIgnore;
 	if (bIgnoreSelf)
@@ -31,8 +35,14 @@ TArray<FHitResult> UCrunchGameplayAbility::GetHitResultsSweepLocationTargetData(
 
 	EDrawDebugTrace::Type DrawDebugType = bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
 
+
 	for (const TSharedPtr<FGameplayAbilityTargetData>& Data : TargetDataHandle.Data)
 	{
+		if (!Data.IsValid())
+		{
+			continue;
+		}
+
 		const FVector StartLocation = Data->GetOrigin().GetTranslation();
 		const FVector EndLocation = Data->GetEndPoint();
 
@@ -50,9 +60,14 @@ TArray<FHitResult> UCrunchGameplayAbility::GetHitResultsSweepLocationTargetData(
 			false
 		);
 
-		if (HitResults.Num() > 0)
+		for (const FHitResult& Hit : HitResults)
 		{
-			OutResults.Append(HitResults);
+			if (HitActors.Contains(Hit.GetActor()))
+			{
+				continue;
+			}
+			HitActors.Add(Hit.GetActor());
+			OutResults.Add(Hit);
 		}
 	}
 	return OutResults;

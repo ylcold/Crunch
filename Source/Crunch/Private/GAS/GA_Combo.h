@@ -40,4 +40,13 @@ private:
 
 	UFUNCTION()
 	void DoDamage(FGameplayEventData Payload);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combo")
+	TMap<FName, TSubclassOf<UGameplayEffect>> DamageEffectMap;
+
+	TSubclassOf<UGameplayEffect> GetDamageEffectForCurrentCombo() const;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combo")
+	TSubclassOf<UGameplayEffect> DefaultDamageEffect;
+
 };

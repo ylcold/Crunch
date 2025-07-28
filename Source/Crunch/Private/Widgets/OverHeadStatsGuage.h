@@ -8,6 +8,7 @@
 
 class UAbilitySystemComponent;
 class UValueGauge;
+class UBaseBarWidget;
 /**
  *
  */
@@ -24,5 +25,5 @@ private:
 	UValueGauge* HealthBar;
 
 	UPROPERTY(meta = (BindWidget))
-	UValueGauge* ManaBar;
+	UBaseBarWidget* ManaBar;
 };
