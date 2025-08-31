@@ -132,7 +132,8 @@ void UGA_Combo::TryCommitCombo()
 
 void UGA_Combo::DoDamage(FGameplayEventData Payload)
 {
-	TArray<FHitResult> HitResults = GetHitResultsSweepLocationTargetData(Payload.TargetData, 30.f, true, true);
+	// 确保只在服务器上执行伤害逻辑
+	TArray<FHitResult> HitResults = GetHitResultsSweepLocationTargetData(Payload.TargetData, TargetSweepSphereRadius, false, true);
 
 	for (const FHitResult& Hit : HitResults)
 	{
@@ -140,6 +141,10 @@ void UGA_Combo::DoDamage(FGameplayEventData Payload)
 		{
 			TSubclassOf<UGameplayEffect> DamageEffect = GetDamageEffectForCurrentCombo();
 			FGameplayEffectSpecHandle DamageSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect, GetAbilityLevel(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo()));
+
+			FGameplayEffectContextHandle EffectContext = MakeEffectContext(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo());
+			EffectContext.AddHitResult(Hit);
+			DamageSpecHandle.Data->SetContext(EffectContext);
 
 			ApplyGameplayEffectSpecToTarget(
 				GetCurrentAbilitySpecHandle(),

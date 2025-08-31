@@ -26,6 +26,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* ComboMontage;
 
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combo")
+	float TargetSweepSphereRadius = 30.f;
+
+
 	UFUNCTION()
 	void OnComboEventReceived(FGameplayEventData Payload);
 
